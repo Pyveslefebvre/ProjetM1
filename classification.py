@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 
 # Chargement des données à partir du fichier CSV
-df = pd.read_csv('cancer_cells.csv')
+df = pd.read_csv('datasets/cancer_cells.csv')
 
 # Extraction de la variable cible 'diagnosis' et conversion des libellés en valeurs numériques.
 y = df['diagnosis']

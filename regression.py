@@ -14,7 +14,7 @@ import numpy as np
 
 """Ouverture Data"""
 
-df = pd.read_csv("samsung_dataset.csv", delimiter=";", on_bad_lines="warn")
+df = pd.read_csv("datasets/samsung_dataset.csv", delimiter=";", on_bad_lines="warn")
 # Convertir la colonne de dates en un format temporel
 df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
 
