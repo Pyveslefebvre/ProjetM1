@@ -1,16 +1,18 @@
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.ensemble import RandomForestRegressor  # Import de RandomForestClassifier
 from sklearn.tree import plot_tree
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 from sklearn.tree import DecisionTreeRegressor  # Import de DecisionTreeRegressor
 from sklearn.ensemble import GradientBoostingRegressor
-from tensorflow.keras import Sequential #Import du réseau de Neurone
+from tensorflow.keras import Sequential     # Import du réseau de Neurone
 from tensorflow.keras.layers import Dense
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, Normalizer
+from random import randint
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+
 
 """Ouverture Data"""
 
@@ -35,6 +37,12 @@ df = df.dropna()
 
 X = df.drop("High",axis=1)
 y = df["High"]
+
+# Standardisation/Normalisation des valeur
+scale = StandardScaler()
+norm = Normalizer()  # Marche mieux avec la Normalisation
+
+X = norm.fit_transform(X)
 
 """Random Forest"""
 
@@ -72,7 +80,7 @@ plt.show()
 """Decision Tree"""
 
 # Initialisation du modèle d'arbre de décision de régression
-tree = DecisionTreeRegressor(max_depth=3, random_state=1)  # Utilisation de DecisionTreeRegressor avec une profondeur maximale de 3
+tree = DecisionTreeRegressor(random_state=1)  # Utilisation de DecisionTreeRegressor avec une profondeur maximale de 3
 
 # Entraînement du modèle sur l'ensemble d'apprentissage
 tree.fit(X_train, y_train)
@@ -82,18 +90,39 @@ y_pred_tree = tree.predict(X_test)
 
 # Calcul de l'erreur quadratique moyenne (MSE) et du coefficient de détermination (R²) pour le modèle Gradient Boosting
 mse_tree = mean_squared_error(y_test, y_pred_tree)
+rmse_tree = np.sqrt(mse_tree)
 r2_tree = r2_score(y_test, y_pred_tree)
 
-
 # Visualisation de l'arbre de régression DecisionTreeRegressor
-plt.figure(figsize=(20,10))
+plt.figure(figsize=(20, 10))
 plot_tree(tree, filled=True, feature_names=X_train.columns, max_depth=3, fontsize=10)
 plt.title('Visualisation de l\'arbre de décision de régression')  # Ajouter un titre différent
 plt.show()
 
-# Affichage des résultats
-print('Erreur quadratique moyenne (MSE) du modèle Decision Tree:', mse_tree,"\n")
-print('Coefficient de détermination (R²) du modèle Decision Tree:', r2_tree,"\n")
+# Initialisation du GridSearch pour fixé les meilleurs hyperparametre
+param_grid = {
+    "max_depth": [None, 3],
+    "max_features": [randint(1, 5), randint(5, 10), randint(10, 15)],
+    "criterion": ["squared_error", "absolute_error"],
+
+}
+
+tree_RS = RandomizedSearchCV(tree, param_grid, cv=20)
+
+tree_RS.fit(X_train, y_train)
+y_pred_tree_RS = tree_RS.predict(X_test)
+
+mse_tree_RS = mean_squared_error(y_test, y_pred_tree_RS)
+rmse_tree_RS = np.sqrt(mse_tree_RS)
+r2_tree_RS = r2_score(y_test, y_pred_tree_RS)
+
+print('L\'Erreur quadratique with DecisionTree : ', rmse_tree)  # Doit être faible
+print('L\'Erreur quadratique with optimized hyperparametre : ', rmse_tree_RS)  # Doit être faible
+print('Score r2 with DecisionTree : ', r2_tree)  # Doit tendre vers 0 (0<r2<1)
+print('Score r2 with optimized hyperparametre : ', r2_tree_RS)  # Doit tendre vers 0 (0<r2<1)
+
+# Affichage du graphique
+plt.show()
 
 """Gradient Boosting"""
 
