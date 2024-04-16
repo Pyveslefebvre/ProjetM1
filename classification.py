@@ -1,4 +1,4 @@
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.ensemble import RandomForestClassifier  # Import de RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.tree import plot_tree
@@ -10,6 +10,7 @@ from sklearn.tree import DecisionTreeClassifier  # Import de DecisionTreeClassif
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from random import randint
 
 # Chargement des données à partir du fichier CSV
 df = pd.read_csv('datasets/cancer_cells.csv')
@@ -113,19 +114,31 @@ plt.show()
 """Arbre de décision"""
 
 # Initialisation du modèle d'arbre de décision de régression
-classifier = DecisionTreeClassifier(max_depth=3, random_state=1)  # Utilisation de DecisionTreeClassifier avec une profondeur maximale de 3
+tree_clf = DecisionTreeClassifier()  # Utilisation de DecisionTreeClassifier avec une profondeur maximale de 3
 # Entraînement du modèle sur l'ensemble d'apprentissage
-classifier.fit(X_train, y_train)
-y_pred_rt = classifier.predict(X_test)
+tree_clf.fit(X_train, y_train)
+y_pred_tree = tree_clf.predict(X_test)
 # Calcul de la précision du modèle SVM en comparant les prédictions avec les valeurs réelles
-acc_rt = accuracy_score(y_test, y_pred_rt)
+acc_rt = accuracy_score(y_test, y_pred_tree)
 
-# Sélection d'un arbre pour la visualisation
-# Note: Contrairement à RandomForest, DecisionTreeRegressor produit un seul arbre, donc pas besoin de sélectionner un estimateur parmi plusieurs.
 # Configuration de la taille de la figure pour la visualisation de l'arbre de régression
 plt.figure(figsize=(20,10))
 # Visualisation de l'arbre de régression
-plot_tree(classifier, filled=True, feature_names=X_train.columns, class_names=['Malignant', 'Benign'], max_depth=3, fontsize=10)
+plot_tree(tree_clf, filled=True, feature_names=X_train.columns, class_names=['Malignant', 'Benign'], max_depth=3, fontsize=10)
+
+# Initialisation de l'optimisation des hyperparametre
+param_grid = {
+    "max_depth": [None],
+    "max_features": [randint(1, 5), randint(5, 10), randint(10, 15)],
+    "criterion": ["gini", "entropy"],
+}
+
+tree_clf_RS = RandomizedSearchCV(tree_clf, param_grid, cv=20)
+
+tree_clf_RS.fit(X_train, y_train)
+y_pred_tree_RS = tree_clf_RS.predict(X_test)
+
+acc_tree_RS = accuracy_score(y_test, y_pred_tree_RS)
 
 # Affichage du graphique
 plt.show()
@@ -137,7 +150,8 @@ print('Random Forest test accuracy:', format(acc_rf, '.4f'))
 
 print('SVM test accuracy:', format(acc_svm, '.4f'))
 
-
 print(f'Reseau de neurones Accuracy: {accuracy*100:.2f}%')
 
 print('Arbre de décision test accuracy:', format(acc_rt, '.4f'))
+
+print('Arbre de décision test accuracy with optimised hypersettings: ', format(acc_tree_RS, '.4f'))
