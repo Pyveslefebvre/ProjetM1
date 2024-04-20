@@ -70,12 +70,11 @@ plt.show()
 """SVM"""
 # 'concave point' et 'radius mean' sont les plus interessants
 X_vis = df[['radius_mean', 'concave_points_mean']]  # seulement 2 feature à visualiser
-
 # split en training et en test
 X_train_vis, X_test_vis, y_train, y_test = train_test_split(X_vis, y, test_size=0.2, random_state=21)
 
-# entrainement du model svm sur 2 featuure
-svm_vis = SVC(kernel='linear', C=1.0, random_state=1)
+# Entrainement du model svm sur 2 features
+svm_vis = SVC(kernel='poly', C=10, random_state=1, gamma='auto',degree=4)
 svm_vis.fit(X_train_vis, y_train)
 
 # Prédiction sur l'ensemble de test avec le modèle SVM
@@ -94,7 +93,44 @@ acc_svm = accuracy_score(y_test, y_pred_svm)
 plt.contourf(xx, yy, Z, alpha=0.5, cmap=plt.cm.coolwarm)
 plt.scatter(X_train_vis.iloc[:, 0], X_train_vis.iloc[:, 1], c=y_train, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
 plt.title('SVM Decision Boundaries (2 Features)')
+plt.legend(handles=[plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='b', markersize=10, label='Malignant'),
+                    plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='r', markersize=10, label='Benign')])
+plt.xlabel('Radius Mean')
+plt.ylabel('Concave Points Mean')
+
 plt.show()
+"""
+# Définir la grille des hyperparamètres à rechercher
+param_grid = {
+    'C': [0.1, 1, 10    ],
+    'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+    'gamma': ['scale', 'auto'],
+    'degree': [2, 3, 4, 5]
+}
+
+# Initialiser RandomizedSearchCV
+svm_random = RandomizedSearchCV(estimator=svm_vis, param_distributions=param_grid, n_iter=100, cv=5, verbose=2,
+                                random_state=42, n_jobs=-1)
+
+# Effectuer la recherche aléatoire sur la grille
+svm_random.fit(X_train_vis, y_train)
+
+# Obtenir les meilleurs paramètres
+best_params_svm = svm_random.best_params_
+print("Meilleurs paramètres pour SVM après optimisation :")
+print(best_params_svm)
+
+# Utiliser les meilleurs paramètres pour entraîner le modèle SVM
+svm_best = SVC(**best_params_svm)
+svm_best.fit(X_train_vis, y_train)
+
+# Prédiction sur l'ensemble de test avec le modèle SVM optimisé
+y_pred_svm_best = svm_best.predict(X_test_vis)
+
+# Calcul de la précision du modèle SVM optimisé
+acc_svm_best = accuracy_score(y_test, y_pred_svm_best)
+print("Précision du SVM après optimisation :", acc_svm_best)
+"""
 
 """Réseau de neurone"""
 
