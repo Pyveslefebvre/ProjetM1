@@ -4,12 +4,16 @@ from sklearn.metrics import accuracy_score
 from sklearn.tree import plot_tree, DecisionTreeClassifier
 from sklearn.svm import SVC
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dense, Dropout
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from random import randint
+import  time
+
+# Compteur
+start_time = time.time()
 
 # Chargement des données à partir du fichier CSV
 df = pd.read_csv('datasets/cancer_cells.csv')
@@ -138,23 +142,63 @@ print("Précision du SVM après optimisation :", acc_svm_best)
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
-# Création du modèle de réseau de neurones
+"""
+# Fonction pour optimiser les hyperparamètres du modèle
+def optimize_hyperparameters(X_train_scaled, y_train):
+    def build_hypermodel(hp):
+        model = Sequential()
+        model.add(Dense(units=hp.Int('units_input', min_value=8, max_value=64, step=8),
+                        input_dim=X_train_scaled.shape[1], activation='relu'))
+        model.add(Dropout(rate=hp.Float('dropout_input', min_value=0.0, max_value=0.5, step=0.1)))
+        model.add(Dense(units=hp.Int('units_hidden', min_value=8, max_value=64, step=8), activation='relu'))
+        model.add(Dropout(rate=hp.Float('dropout_hidden', min_value=0.0, max_value=0.5, step=0.1)))
+        model.add(Dense(1, activation='sigmoid'))
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+        return model
+
+    tuner = RandomSearch(
+        build_hypermodel,
+        objective='val_accuracy',
+        max_trials=10,
+        executions_per_trial=2,
+        directory='hyperparam_opt',
+        project_name='breast_cancer_optimization'
+    )
+
+    tuner.search(X_train_scaled, y_train, epochs=100, validation_split=0.2, verbose=1)
+
+    best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
+    print("Meilleurs hyperparamètres trouvés :")
+    print(f"Nombre d'unités dans la couche d'entrée : {best_hps.get('units_input')}")
+    print(f"Taux de dropout dans la couche d'entrée : {best_hps.get('dropout_input')}")
+    print(f"Nombre d'unités dans la couche cachée : {best_hps.get('units_hidden')}")
+    print(f"Taux de dropout dans la couche cachée : {best_hps.get('dropout_hidden')}")
+
+# Utilisation de la fonction d'optimisation pour trouver les meilleurs hyperparamètres
+optimize_hyperparameters(X_train_scaled, y_train)
+"""
+
+# Création du modèle de réseau de neurones avec les hyperparamètres optimisés
 model = Sequential()
-model.add(Dense(12, input_dim=X_train_scaled.shape[1], activation='relu'))  # Couche d'entrée
-model.add(Dense(8, activation='relu'))  # Couche cachée
-model.add(Dense(1, activation='sigmoid'))  # Couche de sortie
-# Compilation du modèle
+model.add(Dense(56, input_dim=X_train_scaled.shape[1], activation='relu'))  # Nombre d'unités optimisé
+model.add(Dropout(0.1))  # Taux de dropout optimisé
+model.add(Dense(64, activation='relu'))  # Nombre d'unités pour la couche cachée optimisé
+model.add(Dropout(0.30000000000000004))  # Taux de dropout pour la couche cachée optimisé
+model.add(Dense(1, activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
 # Entraînement du modèle
 history = model.fit(X_train_scaled, y_train, validation_split=0.2, epochs=100, batch_size=10, verbose=0)
-# Évaluation du modèle
+
+# Évaluation du modèle sur l'ensemble de test
 _, accuracy = model.evaluate(X_test_scaled, y_test)
-# Tracer la courbe de performance
+
+# Affichage de la courbe de performance
 plt.plot(history.history['accuracy'], label='train')
 plt.plot(history.history['val_accuracy'], label='validation')
-plt.title('Modèle Accuracy')
-plt.ylabel('Accuracy')
-plt.xlabel('Epoch')
+plt.title('Précision du Modèle')
+plt.ylabel('Précision')
+plt.xlabel('Époque')
 plt.legend()
 plt.show()
 
@@ -225,3 +269,7 @@ plt.ylim(0.90, 1)
 plt.gca().set_ylim([0.90, 1])
 plt.tight_layout()
 plt.show()
+
+end_time = time.time()
+temps_total = end_time - start_time
+print(f"Temps d'exécution : {temps_total} seconds")
