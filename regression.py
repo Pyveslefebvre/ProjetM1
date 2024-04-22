@@ -54,6 +54,7 @@ rf.fit(X_train, y_train)
 
 y_pred = rf.predict(X_test)
 mse_rf = mean_squared_error(y_test, y_pred)
+rmse_rf = np.sqrt(mse_rf)
 r2_rf = r2_score(y_test, y_pred)
 
 # Plot prediction error
@@ -118,6 +119,7 @@ tree.fit(X_train, y_train)
 y_pred_tree = tree.predict(X_test)
 
 mse_tree = mean_squared_error(y_test, y_pred_tree)
+rmse_tree = np.sqrt(mse_tree)
 r2_tree = r2_score(y_test, y_pred_tree)
 
 plt.figure(figsize=(20, 10))
@@ -136,6 +138,7 @@ tree_RS.fit(X_train, y_train)
 y_pred_tree_RS = tree_RS.predict(X_test)
 
 mse_tree_RS = mean_squared_error(y_test, y_pred_tree_RS)
+rmse_tree_RS = np.sqrt(mse_tree_RS)
 r2_tree_RS = r2_score(y_test, y_pred_tree_RS)
 
 
@@ -146,6 +149,7 @@ gbr.fit(X_train, y_train)
 y_pred_gbr = gbr.predict(X_test)
 
 mse_gbr = mean_squared_error(y_test, y_pred_gbr)
+rmse_gbr = np.sqrt(mse_gbr)
 r2_gbr = r2_score(y_test, y_pred_gbr)
 
 plt.figure(figsize=(10, 8))
@@ -182,11 +186,51 @@ plt.legend()
 plt.show()
 
 """Affichage"""
-print("Random forest RMSE:", np.sqrt(mse_rf))
+print("Random forest RMSE:", rmse_rf)
 print("Random forest R²:", r2_rf)
-print('Decision Tree RMSE: ', np.sqrt(mse_tree))
-print('Decision Tree RMSE Optimized Hyperparameters: ', np.sqrt(mse_tree_RS))
+print('Decision Tree RMSE: ', rmse_tree)
+print('Decision Tree RMSE Optimized Hyperparameters: ', rmse_tree_RS)
 print('Decision Tree R²: ', r2_tree)
 print('Decision Tree R² Optimized Hyperparameters: ', r2_tree_RS)
-print('Gradient Boosting RMSE:', np.sqrt(mse_gbr))
+print('Gradient Boosting RMSE:', rmse_gbr)
 print('Gradient Boosting R²:', r2_gbr)
+
+# Liste des noms de modèles
+models = ['Random Forest', 'Decision Tree', 'Gradient Boosting']
+
+# Liste des valeurs RMSE pour chaque modèle
+rmse_values = [rmse_rf, rmse_tree_RS, rmse_gbr]
+
+# Liste des valeurs R² pour chaque modèle
+r2_values = [r2_rf, r2_tree_RS, r2_gbr]
+
+# Création du graphique
+plt.figure(figsize=(10, 6))
+
+# Plot RMSE values
+plt.subplot(1, 2, 1)
+bars_rmse = plt.bar(models, rmse_values, color='skyblue')
+plt.title('RMSE Comparison')
+plt.xlabel('Models')
+plt.ylabel('RMSE')
+
+# Ajout des annotations pour afficher les valeurs de RMSE sur chaque barre
+for bar in bars_rmse:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width() / 2, height, '{:.4f}'.format(height), ha='center', va='bottom')
+
+# Plot R² values
+plt.subplot(1, 2, 2)
+bars_r2 = plt.bar(models, r2_values, color='lightgreen')
+plt.title('R² Comparison')
+plt.xlabel('Models')
+plt.ylabel('R²')
+
+# Ajout des annotations pour afficher les valeurs de R² sur chaque barre
+for bar in bars_r2:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width() / 2, height, '{:.4f}'.format(height), ha='center', va='bottom')
+
+# Affichage du graphique
+plt.tight_layout()
+plt.show()

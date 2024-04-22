@@ -202,3 +202,26 @@ print(f'Reseau de neurones Accuracy: {accuracy*100:.2f}%')
 print('Arbre de décision test accuracy:', format(acc_rt, '.4f'))
 
 print('Arbre de décision test accuracy with optimised hypersettings: ', format(acc_tree_RS, '.4f'))
+
+# Listes des noms de modèles
+models = ['Random Forest', 'SVM', 'Réseau de Neurone', 'Decision Tree']
+
+# Listes des précisions des modèles
+accuracies = [acc_rf, acc_svm, accuracy, acc_rt]
+
+# Création du graphique avec annotations et fonctionnalité de zoom pour afficher entre 0.8 et 1
+plt.figure(figsize=(10, 6))
+bars = plt.bar(models, accuracies, color=['blue', 'green', 'orange', 'red'])
+
+# Ajout des annotations pour afficher les valeurs de précision sur chaque barre
+for bar in bars:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width() / 2, height, '{:.4f}'.format(height), ha='center', va='bottom')
+
+plt.title('Comparaison de la précision des modèles')
+plt.xlabel('Modèles')
+plt.ylabel('Précision')
+plt.ylim(0.90, 1)
+plt.gca().set_ylim([0.90, 1])
+plt.tight_layout()
+plt.show()
