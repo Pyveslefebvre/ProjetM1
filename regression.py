@@ -144,7 +144,10 @@ r2_tree_RS = r2_score(y_test, y_pred_tree_RS)
 
 """Gradient Boosting"""
 
-gbr = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=1)
+# Initialisation du modèle GradientBoostingRegressor
+gbr = GradientBoostingRegressor()
+
+# Entraînement du modèle sur l'ensemble d'apprentissage
 gbr.fit(X_train, y_train)
 y_pred_gbr = gbr.predict(X_test)
 
@@ -152,14 +155,31 @@ mse_gbr = mean_squared_error(y_test, y_pred_gbr)
 rmse_gbr = np.sqrt(mse_gbr)
 r2_gbr = r2_score(y_test, y_pred_gbr)
 
-plt.figure(figsize=(10, 8))
-feature_importance = gbr.feature_importances_
-sorted_idx = np.argsort(feature_importance)
-pos = np.arange(sorted_idx.shape[0]) + .5
-plt.barh(pos, feature_importance[sorted_idx], align='center')
-plt.yticks(pos, np.array(column_names)[sorted_idx])
-plt.title('Feature Importance for Gradient Boosting Model')
-plt.show()
+# Initialisation RandomSearchCV pour optimiser les hyperparametre
+
+param = {
+    'max_depth': [7, 8, 9],
+    'learning_rate': [0.1, 0.3, 0.6],
+    'n_estimators': [100, 200],
+    'max_features': ['sqrt', 'log2'],
+    'criterion': ['squared_error', 'absolute_error'],
+    'loss': ['squared_error', 'absolute_error'],
+}
+
+gbr_RS = RandomizedSearchCV(gbr, param, cv=20)
+
+gbr_RS.fit(X_train, y_train)
+y_pred_gbr_RS = gbr_RS.predict(X_test)
+
+mse_gbr_RS = mean_squared_error(y_test, y_pred_gbr_RS)
+rmse_gbr_RS = np.sqrt(mse_gbr_RS)
+r2_gbr_RS = r2_score(y_test, y_pred_gbr_RS)
+
+# Affichage des résultats
+print('Erreur quadratique moyenne (RMSE) du modèle Gradient Boosting:', rmse_gbr, "\n")
+print('Erreur quadratique moyenne (RMSE) du modèle Gradient Boosting avec hyperparametre optimisé:', rmse_gbr_RS, "\n")
+print('Coefficient de détermination (R²) du modèle Gradient Boosting:', r2_gbr, "\n")
+print('Coefficient de détermination (R²) du modèle Gradient Boosting avec hyperparameter optimisé:', r2_gbr_RS, "\n")
 
 """Neural Network"""
 
