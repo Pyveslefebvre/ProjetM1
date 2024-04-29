@@ -205,7 +205,7 @@ plt.show()
 """Arbre de décision"""
 
 # Initialisation du modèle d'arbre de décision de régression
-tree_clf = DecisionTreeClassifier()  # Utilisation de DecisionTreeClassifier avec une profondeur maximale de 3
+tree_clf = DecisionTreeClassifier(criterion='entropy', max_depth=None, max_features=7, splitter='best')  # Utilisation de DecisionTreeClassifier avec une profondeur maximale de 3
 # Entraînement du modèle sur l'ensemble d'apprentissage
 tree_clf.fit(X_train, y_train)
 y_pred_tree = tree_clf.predict(X_test)
@@ -217,19 +217,26 @@ plt.figure(figsize=(20,10))
 # Visualisation de l'arbre de régression
 plot_tree(tree_clf, filled=True, feature_names=X_train.columns, class_names=['Malignant', 'Benign'], max_depth=3, fontsize=10)
 
+"""
 # Initialisation de l'optimisation des hyperparametre
 param_grid = {
-    "max_depth": [None],
+    "max_depth": [3, 5, 10, None],
     "max_features": [randint(1, 5), randint(5, 10), randint(10, 15)],
     "criterion": ["gini", "entropy"],
+    "splitter": ["best", "random"]
 }
 
-tree_clf_RS = RandomizedSearchCV(tree_clf, param_grid, cv=20)
+tree_clf_RS = GridSearchCV(tree_clf, param_grid, cv=20)
 
 tree_clf_RS.fit(X_train, y_train)
 y_pred_tree_RS = tree_clf_RS.predict(X_test)
 
 acc_tree_RS = accuracy_score(y_test, y_pred_tree_RS)
+
+hyperparam = tree_clf_RS.best_params_
+=> {'criterion': 'entropy', 'max_depth': None, 'max_features': 7, 'splitter': 'best'}
+
+"""
 
 # Affichage du graphique
 plt.show()
@@ -244,8 +251,6 @@ print('SVM test accuracy:', format(acc_svm, '.4f'))
 print(f'Reseau de neurones Accuracy: {accuracy*100:.2f}%')
 
 print('Arbre de décision test accuracy:', format(acc_rt, '.4f'))
-
-print('Arbre de décision test accuracy with optimised hypersettings: ', format(acc_tree_RS, '.4f'))
 
 # Listes des noms de modèles
 models = ['Random Forest', 'SVM', 'Réseau de Neurone', 'Decision Tree']
