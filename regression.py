@@ -114,38 +114,49 @@ print("Meilleurs paramètres:", rf_random.best_params_)
 
 """Decision Tree"""
 
-tree = DecisionTreeRegressor(random_state=1, max_depth=3)
+# Initialisation du modèle d'arbre de décision de régression
+tree = DecisionTreeRegressor(criterion='squared_error', max_depth= 10, max_features= 8,random_state=1)  # Utilisation de DecisionTreeRegressor avec une profondeur maximale de 3
+
+# Entraînement du modèle sur l'ensemble d'apprentissage
 tree.fit(X_train, y_train)
+
+# Prédiction sur l'ensemble de test
 y_pred_tree = tree.predict(X_test)
 
+# Calcul de l'erreur quadratique moyenne (MSE) et du coefficient de détermination (R²) pour le modèle Gradient Boosting
 mse_tree = mean_squared_error(y_test, y_pred_tree)
 rmse_tree = np.sqrt(mse_tree)
 r2_tree = r2_score(y_test, y_pred_tree)
 
+# Visualisation de l'arbre de régression DecisionTreeRegressor
 plt.figure(figsize=(20, 10))
-plot_tree(tree, filled=True, feature_names=column_names, max_depth=3, fontsize=10)
-plt.title('Decision Tree Regression Visualization')
+plot_tree(tree, filled=True, max_depth=3, fontsize=10)
+plt.title('Visualisation de l\'arbre de décision de régression')  # Ajouter un titre différent
 plt.show()
 
+"""
+# Initialisation du GridSearch pour fixé les meilleurs hyperparametre
 param_grid = {
-    "max_depth": [None, 3],
-    "max_features": [randint(1, 5), randint(5, 10), randint(10, 15)],
-    "criterion": ["mse", "friedman_mse"],
+    "max_depth": [None, 3, 6, 10],
+    "max_features": [2, 4, 8, 10, 20, 50, 100],
+    "criterion": ["squared_error", "absolute_error"],
+
 }
 
-tree_RS = RandomizedSearchCV(tree, param_grid, cv=20)
+tree_RS = GridSearchCV(tree, param_grid, cv=20)
+
 tree_RS.fit(X_train, y_train)
 y_pred_tree_RS = tree_RS.predict(X_test)
 
-mse_tree_RS = mean_squared_error(y_test, y_pred_tree_RS)
-rmse_tree_RS = np.sqrt(mse_tree_RS)
-r2_tree_RS = r2_score(y_test, y_pred_tree_RS)
+hyperparam = tree_RS.best_params_
+
+"""
 
 
 """Gradient Boosting"""
 
 # Initialisation du modèle GradientBoostingRegressor
-gbr = GradientBoostingRegressor()
+gbr = GradientBoostingRegressor(criterion= 'friedman_mse', learning_rate= 0.1, loss= 'squared_error', max_depth= 9, max_features= 'log2')
 
 # Entraînement du modèle sur l'ensemble d'apprentissage
 gbr.fit(X_train, y_train)
@@ -155,31 +166,20 @@ mse_gbr = mean_squared_error(y_test, y_pred_gbr)
 rmse_gbr = np.sqrt(mse_gbr)
 r2_gbr = r2_score(y_test, y_pred_gbr)
 
-# Initialisation RandomSearchCV pour optimiser les hyperparametre
-
+"""
+# Initialisation GridSearch pour optimiser les hyperparametre
 param = {
     'max_depth': [7, 8, 9],
     'learning_rate': [0.1, 0.3, 0.6],
-    'n_estimators': [100, 200],
     'max_features': ['sqrt', 'log2'],
-    'criterion': ['squared_error', 'absolute_error'],
+    'criterion': ['friedman_mse', 'squared_error'],
     'loss': ['squared_error', 'absolute_error'],
 }
 
-gbr_RS = RandomizedSearchCV(gbr, param, cv=20)
+gbr_RS = GridSearchCV(gbr, param, cv=10, verbose= 1)
 
 gbr_RS.fit(X_train, y_train)
-y_pred_gbr_RS = gbr_RS.predict(X_test)
-
-mse_gbr_RS = mean_squared_error(y_test, y_pred_gbr_RS)
-rmse_gbr_RS = np.sqrt(mse_gbr_RS)
-r2_gbr_RS = r2_score(y_test, y_pred_gbr_RS)
-
-# Affichage des résultats
-print('Erreur quadratique moyenne (RMSE) du modèle Gradient Boosting:', rmse_gbr, "\n")
-print('Erreur quadratique moyenne (RMSE) du modèle Gradient Boosting avec hyperparametre optimisé:', rmse_gbr_RS, "\n")
-print('Coefficient de détermination (R²) du modèle Gradient Boosting:', r2_gbr, "\n")
-print('Coefficient de détermination (R²) du modèle Gradient Boosting avec hyperparameter optimisé:', r2_gbr_RS, "\n")
+"""
 
 """Neural Network"""
 
@@ -209,9 +209,7 @@ plt.show()
 print("Random forest RMSE:", rmse_rf)
 print("Random forest R²:", r2_rf)
 print('Decision Tree RMSE: ', rmse_tree)
-print('Decision Tree RMSE Optimized Hyperparameters: ', rmse_tree_RS)
 print('Decision Tree R²: ', r2_tree)
-print('Decision Tree R² Optimized Hyperparameters: ', r2_tree_RS)
 print('Gradient Boosting RMSE:', rmse_gbr)
 print('Gradient Boosting R²:', r2_gbr)
 
@@ -219,10 +217,10 @@ print('Gradient Boosting R²:', r2_gbr)
 models = ['Random Forest', 'Decision Tree', 'Gradient Boosting']
 
 # Liste des valeurs RMSE pour chaque modèle
-rmse_values = [rmse_rf, rmse_tree_RS, rmse_gbr]
+rmse_values = [rmse_rf, rmse_tree, rmse_gbr]
 
 # Liste des valeurs R² pour chaque modèle
-r2_values = [r2_rf, r2_tree_RS, r2_gbr]
+r2_values = [r2_rf, r2_tree, r2_gbr]
 
 # Création du graphique
 plt.figure(figsize=(10, 6))
