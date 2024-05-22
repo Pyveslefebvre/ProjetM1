@@ -23,20 +23,25 @@ class CifarClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         model.set_weights(parameters)
+        print("Entraînement du modèle...")
         model.fit(x_train, y_train, epochs=1, batch_size=32)
         return model.get_weights(), len(x_train), {}
 
     def evaluate(self, parameters, config):
         model.set_weights(parameters)
+        print("Évaluation du modèle...")
         loss, accuracy = model.evaluate(x_test, y_test)
         return loss, len(x_test), {"accuracy": accuracy}
 
 
-#Start Flower Client
-fl.client.start_numpy_client(
-    server_address="127.0.0.1:8080",
-    client=CifarClient()
-)
+# Start Flower Server
+try:
+    fl.client.start_numpy_client(
+        server_address="127.0.0.1:8080",
+        client=CifarClient()
+    )
+except Exception as e:
+    print(f"Erreur lors de la connexion au serveur Flower: {e}")
 
 """
 Résumé du dataset CIFAR-10:
