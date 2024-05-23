@@ -1,8 +1,6 @@
 from collections import OrderedDict
-
 import torch
 import flwr as fl
-
 from centralized import load_data, load_model, train, test
 
 
@@ -18,14 +16,17 @@ trainloader, testloader = load_data()
 
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
+        print("Client: get_parameters called")
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
     def fit(self, parameters, config):
+        print("Client: fit called")
         set_parameters(net, parameters)
         train(net, trainloader,epochs=1)
         return self.get_parameters({}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
+        print("Client: evaluate called")
         set_parameters(net, parameters)
         loss, accuracy = test(net, testloader)
         return float(loss), len(testloader.dataset), {'accuracy': accuracy}
