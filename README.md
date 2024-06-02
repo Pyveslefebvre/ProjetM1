@@ -1,6 +1,7 @@
-# 👋 Bienvenue dans notre projet ING2 2 Majeure Intelligence Artificielle : 
+# <p align="center">👋 Bienvenue dans notre projet ING2 2 Majeure Intelligence Artificielle :</p>
 
-## Le Federated Learning, première approche d'une révolution de l'apprentissage supervisé
+## <p align="center">Le Federated Learning, première approche d'une révolution de l'apprentissage supervisé</p>
+
 
 <p align="center">
   <img src="https://miro.medium.com/v2/resize:fit:828/format:webp/1*nMG4NRWj8hp3qTgTtOZwyA.png" alt="Federated Learning">
@@ -29,6 +30,7 @@ cd ProjetM1
 pip install -r requirements.txt
 ```
 4. Lancez les applications souhaitées:
+
   -Tests sur la régression:
 ```bash
 python regression.py
