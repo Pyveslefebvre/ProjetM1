@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Nombre de clients à lancer
-num_clients=5
+num_clients=3
 
 # Adresse du serveur Flower
 server_address="127.0.0.1:8080"
@@ -12,3 +12,5 @@ do
 done
 
 wait
+
+

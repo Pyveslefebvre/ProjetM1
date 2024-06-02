@@ -3,16 +3,13 @@ import torch
 import flwr as fl
 from centralized import load_data, load_model, train, test
 
+net = load_model()
+trainloader, testloader = load_data()
 
 def set_parameters(model, parameters):
     params_dict = zip(model.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
-
-
-net = load_model()
-trainloader, testloader = load_data()
-
 
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
